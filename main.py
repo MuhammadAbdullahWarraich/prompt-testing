@@ -18,7 +18,10 @@ def _run_experiment(exp_data):
 @app.command()
 def run_experiment(exp_id: int):
     import_path = f"experiments.{exp_id}"
-    exp_data = importlib.import_module(import_path)
+    try:
+        exp_data = importlib.import_module(import_path)
+    except Exception:
+        raise typer.BadParameter(param_hint=f"No data available for experiment titled \"{exp_id}\"")
     print(exp_data.repos)
     _run_experiment(exp_data)
 

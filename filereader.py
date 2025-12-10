@@ -72,7 +72,7 @@ class FileReader:
         file_path = self.currRepoFiles[self.currFileIdx]
         self.currFileIdx += 1
         with open(file_path, "r") as f:
-            file_content = f.read()
+            file_content = f.readlines()
         return {
             "filepath": file_path,
             "file_content": file_content
