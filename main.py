@@ -107,6 +107,7 @@ def transform_prompts(prompts):
             "gemini_config": p.gemini_config,
             "output_parser": inspect.getsource(p.output_parser)
         })
+    return pnew
 def _run_experiment(exp_data, exp_name):
     file_reader = FileReader(repos=exp_data.repos)
     scores = [0 for _ in range(len(exp_data.prompts))]
