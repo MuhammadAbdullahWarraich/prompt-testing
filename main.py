@@ -10,6 +10,7 @@ import logging
 import time
 from exp_reg import log_experiment_params
 import inspect
+from google.genai import types
 
 got_warning = False
 class WarningCatcher(logging.Handler):
@@ -101,10 +102,14 @@ def get_curr_file_language(filepath):
 def transform_prompts(prompts):
     pnew = []
     for p in prompts:
+        if (t_gconf := p.gemini_config) is not None:
+            t_gconf = dict(**p.gemini_config)
+        if None != t_gconf and (thinking := t_gconf.get('thinking_config')) != None and type(thinking) == types.ThinkingConfig:
+            t_gconf['thinking_config'] = thinking.model_dump_json()
         pnew.append({
             "id": p.id,
             "ptext": p.ptext,
-            "gemini_config": p.gemini_config,
+            "gemini_config": t_gconf,
             "output_parser": inspect.getsource(p.output_parser)
         })
     return pnew
