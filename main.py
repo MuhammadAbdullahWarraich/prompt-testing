@@ -8,6 +8,8 @@ import os
 from codebleu import calc_codebleu
 import logging
 import time
+from exp_reg import log_experiment_params
+import inspect
 
 got_warning = False
 class WarningCatcher(logging.Handler):
@@ -96,8 +98,16 @@ EXT_MAP = {
 def get_curr_file_language(filepath):
     _, ext = os.path.splitext(filepath)
     return EXT_MAP.get(ext)
-
-def _run_experiment(exp_data):
+def transform_prompts(prompts):
+    pnew = []
+    for p in prompts:
+        pnew.append({
+            "id": p.id,
+            "ptext": p.ptext,
+            "gemini_config": p.gemini_config,
+            "output_parser": inspect.getsource(p.output_parser)
+        })
+def _run_experiment(exp_data, exp_name):
     file_reader = FileReader(repos=exp_data.repos)
     scores = [0 for _ in range(len(exp_data.prompts))]
     if not os.path.exists(os.path.join(os.getcwd(), "logs")):
@@ -123,16 +133,18 @@ def _run_experiment(exp_data):
                     for i in range(len(scores)):
                         scores[i] += latest_scores[i]
     print("scores:", scores)
+    prompts_d = transform_prompts(exp_data.prompts)
+    log_experiment_params(exp_name, prompts_d, exp_data.repos, "expect_last_line", "basic experiment")
 
 @app.command()
-def run_experiment(exp_id: int):
+def run_experiment(exp_id: int, exp_name: str):
     import_path = f"experiments.{exp_id}"
     try:
         exp_data = importlib.import_module(import_path)
     except Exception:
         raise typer.BadParameter(param_hint=f"No data available for experiment titled \"{exp_id}\"")
     print(exp_data.repos)
-    _run_experiment(exp_data)
+    _run_experiment(exp_data, exp_name)
 
 if __name__ == "__main__":
     app()
