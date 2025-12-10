@@ -13,5 +13,5 @@ def chunkerize_file(file_content: list[str], chunk_size: int = 3) -> list[tuple[
             chunks.pop(i)
             break
         target = chunks[i][-1]
-        chunks[i] = (chunks[i][:-1], target)
+        chunks[i] = ('\n'.join(chunks[i][:-1]) + "<CURSOR>", target)
     return chunks
